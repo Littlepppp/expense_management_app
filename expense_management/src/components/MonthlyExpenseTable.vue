@@ -5,41 +5,80 @@
     item-key="name"
     items-per-page="5"
   ></v-data-table>
-  <v-fab icon="mdi-plus" location="bottom right" app> </v-fab>
+  <v-fab
+    icon="mdi-plus"
+    location="bottom right"
+    app
+    @click="addExpenseDialog = true"
+  >
+  </v-fab>
+  <v-dialog v-model="addExpenseDialog" width="auto">
+    <v-card title="Add Expense" min-width="500">
+      <v-card-text class="pa-3">
+        <v-text-field
+          label="Date"
+          model-value="1/1/2025"
+          type="date"
+          v-model="addExpenseDate"
+        ></v-text-field>
+        <v-text-field
+          label="Description"
+          type="input"
+          v-model="addExpenseDescription"
+        ></v-text-field>
+        <v-text-field
+          label="Amount"
+          prefix="$"
+          type="number"
+          v-model="addExpenseAmount"
+        ></v-text-field>
+        <v-autocomplete
+          v-model="addExpenseCatogry"
+          label="Select Catogry"
+          :items="monthlyExpenseStore.monthlyExpenseCatogries"
+        ></v-autocomplete>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn
+          variant="tonal"
+          @click="addExpenseDialog = false"
+          text="Cancel"
+        ></v-btn>
+        <v-btn
+          variant="elevated"
+          color="primary"
+          @click="addExpense()"
+          text="Add"
+        ></v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 <script setup>
-const headers = [
-  { title: "Date", value: "expenseDate" },
-  { title: "Description", value: "description" },
-  { title: "Amount", value: "amount" },
-  { title: "Category", value: "category" },
-];
-const items = [
-  {
-    expenseDate: "1/1/2025",
-    description: "Costco",
-    amount: "146.6",
-    category: "Grocery",
-  },
-  {
-    expenseDate: "1/1/2025",
-    description: "Shell",
-    amount: "33",
-    category: "Gas",
-  },
+import { computed, ref } from "vue";
+import { useMonthlyExpenseStore } from "@/stores/monthlyExpense";
 
-  {
-    expenseDate: "1/1/2025",
-    description: "BK",
-    amount: "6.6",
-    category: "Food",
-  },
+const monthlyExpenseStore = useMonthlyExpenseStore();
+const addExpenseDialog = ref(false);
+const addExpenseDate = ref(null);
+const addExpenseDescription = ref("");
+const addExpenseAmount = ref(null);
+const addExpenseCatogry = ref("");
 
-  {
-    expenseDate: "1/3/2025",
-    description: "Safeway",
-    amount: "16.2",
-    category: "Grocery",
-  },
-];
+const headers = computed(() => {
+  return monthlyExpenseStore.monthlyExpenseHeaders;
+});
+const items = computed(() => {
+  return monthlyExpenseStore.monthlyExpenseItems;
+});
+
+function addExpense() {
+  monthlyExpenseStore.addMonthlyExpense(
+    addExpenseDate.value,
+    addExpenseDescription.value,
+    addExpenseAmount.value,
+    addExpenseCatogry.value
+  );
+  addExpenseDialog.value = false;
+}
 </script>
